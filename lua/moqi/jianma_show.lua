@@ -5,7 +5,7 @@
 local Module = {}
 
 function Module.init(env)
-   local dict = "moqi_single"  -- 回到使用 moqi_single 词典，这是墨奇音形的核心词典
+   local dict = "moqi_wan.extended"  -- 使用精简后保留的主词典
    log.info("jianma_show Module.init: initializing with dict " .. dict)
    -- 这里必须先在build文件夹下构建一个 xxx.reverse.bin二进制文件，用txt自定义短语不行
    local reverse_lookup = ReverseLookup(dict)
@@ -16,7 +16,7 @@ function Module.init(env)
       -- 由于reverse_lookup为nil，我们不能调用log.warn，而是使用更安全的方式
       env.custom_phrase_reverse = nil  -- 明确设置为nil，以便在func中检测
       log.warn("jianma_show Module.init: Failed to create ReverseLookup for " .. dict)
-      log.warn("jianma_show Module.init: Make sure moqi_single.reverse.bin exists in build folder")
+      log.warn("jianma_show Module.init: Make sure moqi_wan.extended.reverse.bin exists in build folder")
    end
 end
 
@@ -34,22 +34,22 @@ function Module.func(translation, env)
       end
       return
    end
-   
+
    for cand in translation:iter() do
       log.info("jianma_show processing candidate: " .. (cand.text or "nil") .. ", type: " .. (cand.type or "nil") .. ", preedit: " .. (cand.preedit or "nil"))
       local gcand = cand:get_genuine()
       local word = gcand.text
       local word_len = utf8.len(word)
       log.info("jianma_show word: " .. (word or "nil") .. ", length: " .. (word_len or "nil"))
-      
+
       -- 检查当前输入的编码长度是否>=4
       local current_input_length = 0
       if cand.preedit then
          current_input_length = #cand.preedit
       end
-      
+
       log.info("jianma_show current input length: " .. current_input_length)
-      
+
       if word_len == 1 then
          log.info("jianma_show skipping single character: " .. word)
          yield(cand)
@@ -62,7 +62,7 @@ function Module.func(translation, env)
             local codes = {}
             local short_codes = {}  -- 专门存储简码（长度小于等于2的码）
             local four_char_codes = {}  -- 专门存储四字词的四码（仅对四字词）
-            
+
             for code in all_codes:gmatch("%S+") do
                log.info("jianma_show checking code: " .. code .. ", length: " .. #code)
                if #code <= 2 then
@@ -87,7 +87,7 @@ function Module.func(translation, env)
                   -- 不再进行任何提取逻辑
                end
             end
-            
+
             -- 优先显示真正的简码（长度≤2的码）
             if #short_codes > 0 then
                local short_codes_hint = table.concat(short_codes, " ")

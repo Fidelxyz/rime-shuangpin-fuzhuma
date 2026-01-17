@@ -4,11 +4,11 @@
 #Lua 配置: 超级注释模块
 pro_comment_format:                   # 超级注释，子项配置 true 开启，false 关闭
   fuzhu_code: true                    # 启用辅助码提醒，用于辅助输入练习辅助码，成熟后可关闭
-  candidate_length: 1                 # 候选词辅助码提醒的生效长度，0为关闭  但同时清空其它，应当使用上面开关来处理    
+  candidate_length: 1                 # 候选词辅助码提醒的生效长度，0为关闭  但同时清空其它，应当使用上面开关来处理
   fuzhu_type: flypy                     # 用于匹配对应的辅助码注释显示，可选显示类型有：moqi, flypy, zrm, jdh, cj, tiger, wubi,选择一个填入，应与上面辅助码类型一致
 
   corrector: true                     # 启用错音错词提醒，例如输入 geiyu 给予 获得 jiyu 提示
-  corrector_type: "{comment}"         # 新增一个显示类型，比如"【{comment}】" 
+  corrector_type: "{comment}"         # 新增一个显示类型，比如"【{comment}】"
 
 schema:
   schema_id: moqi_wan_flypy
@@ -19,93 +19,131 @@ schema:
   description: |
     墨奇辅助码 小鹤双拼版 大词库版本 非自动上屏，支持4万字 https://github.com/gaboolic/rime-shuangpin-fuzhuma/wiki/%E5%A2%A8%E5%A5%87%E7%A0%81%E6%8B%86%E5%88%86%E8%A7%84%E5%88%99
   dependencies:
-    - reverse_moqima
     - radical_flypy
     - stroke
-    - zrlf
-    - emoji
     - easy_en
-    - jp_sela
-    - moqi_big
 
-__include: moqi.yaml:/switches_engine
-__include: moqi.yaml:/phrase # 置顶
-__include: moqi.yaml:/reverse #反查配置
-__include: moqi.yaml:/opencc_config # 拆分 英汉互译 火星文
-__include: moqi.yaml:/punctuator # 标点
-__include: moqi.yaml:/guide # 引导前缀配置
+switches:
+  __include: moqi.yaml:/switches_engine/switches
+engine:
+  __include: moqi.yaml:/switches_engine/engine
+
+# 置顶
+custom_phrase:
+  __include: moqi.yaml:/phrase/custom_phrase
+custom_phrase_super_3jian_no_conflict:
+  __include: moqi.yaml:/phrase/custom_phrase_super_3jian_no_conflict
+custom_phrase_super_4jian_no_conflict:
+  __include: moqi.yaml:/phrase/custom_phrase_super_4jian_no_conflict
+custom_phrase_kf:
+  __include: moqi.yaml:/phrase/custom_phrase_kf
+custom_phrase_mqzg:
+  __include: moqi.yaml:/phrase/custom_phrase_mqzg
+custom_phrase_super_1jian:
+  __include: moqi.yaml:/phrase/custom_phrase_super_1jian
+custom_phrase_super_2jian:
+  __include: moqi.yaml:/phrase/custom_phrase_super_2jian
+custom_phrase_super_3jian:
+  __include: moqi.yaml:/phrase/custom_phrase_super_3jian
+
+# 反查配置
+radical_flypy:
+  __include: moqi.yaml:/reverse/radical_flypy
+reverse_stroke:
+  __include: moqi.yaml:/reverse/reverse_stroke
+reverse_lookup:
+  __include: moqi.yaml:/reverse/reverse_lookup
+
+# OpenCC 配置
+chaifen:
+  __include: moqi.yaml:/opencc_config/chaifen
+chaifen_all:
+  __include: moqi.yaml:/opencc_config/chaifen_all
+chinese_english:
+  __include: moqi.yaml:/opencc_config/chinese_english
+traditionalize:
+  __include: moqi.yaml:/opencc_config/traditionalize
+mars:
+  __include: moqi.yaml:/opencc_config/mars
+
+# 标点
+punctuator:
+  __include: moqi.yaml:/punctuator/punctuator
+
+# 引导前缀配置
+recognizer:
+  __include: moqi.yaml:/guide/recognizer
+easy_en_simp:
+  __include: moqi.yaml:/guide/easy_en_simp
+calculator:
+  __include: moqi.yaml:/guide/calculator
+date_translator:
+  __include: moqi.yaml:/guide/date_translator
+lunar:
+  __include: moqi.yaml:/guide/lunar
+long_word_filter:
+  __include: moqi.yaml:/guide/long_word_filter
+
+# 大字集、自造词
+big_char_set:
+  __include: moqi.yaml:/big_char_and_user_dict/big_char_set
+user_dict_set:
+  __include: moqi.yaml:/big_char_and_user_dict/user_dict_set
+add_user_dict:
+  __include: moqi.yaml:/big_char_and_user_dict/add_user_dict
 
 speller:
   max_code_length: 5
-  # table_translator翻译器，支持自动上屏。例如 “zmhu”可以自动上屏“怎么回事”
   auto_select: false
   auto_select_pattern: ^[a-z]+/|^[a-df-zA-DF-Z]\w{3}|^e\w{4}|;[a-z]
-  # 如果不想让什么标点直接上屏，可以加在 alphabet，或者编辑标点符号为两个及以上的映射
   alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA[/|
-  # initials 定义仅作为始码的按键，排除 ` 让单个的 ` 可以直接上屏
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
-  # 第一位<空格>是拼音之间的分隔符；第二位<'>表示可以手动输入单引号来分割拼音。
   delimiter: " '"
-  ## speller 未允许 aj 表示 an
   algebra:
-    # ^(.+?);.*$
-    #- derive|^(.+?);.*$|$1| # 纯双拼的情况
-    __include: moqi_speller.yaml:/flypy_speller # 小鹤双拼
-
-
-__include: moqi.yaml:/big_char_and_user_dict # 大字集、自造词
+    __include: moqi_speller.yaml:/flypy_speller
+    __append:
+      # flypy_aux - 小鹤形辅助码
+      - xform/^(.{2}|\w+?);.*?;(.*?);.*$/$1;$2/
+      # common_aux - 通用辅助码处理
+      - derive/^(.{2}|\w+?);.*$/$1/ # 纯双拼的情况
+      - derive/^(.{2}|\w+?);(\w)(\w).*$/$1$2/ # 双拼+一位辅助码的情况
+      - derive/^(.{2}|\w+?);(\w)(\w).*$/$1[$2/ # 双拼+[一位辅助码的情况
+      - derive/^(.{2}|\w+?);.*?,(\w)(\w).*$/$1$2/ # 双拼+一位辅助码的情况
+      - derive/^(.{2}|\w+?);.*?,(\w)(\w).*$/$1[$2/ # 双拼+[一位辅助码的情况
+      - abbrev/^(.{2}|\w+?);(\w)(\w).*$/$1$2$3/ # 双拼+2位辅助码的情况
+      - abbrev/^(.{2}|\w+?);.*?,(\w)(\w).*$/$1$2$3/ # 双拼+2位辅助码的情况
+      - derive/^(.{2}|\w+?);(\w)(\w).*$/$1$2$3o/ # 整句模式下，输入syffo 出单字
+      - derive|^(.{2});(\w)(\w).*$|$1$2$3/| # 整句模式下，输入syff/ 出单字
+      - derive|^(\w+?);(\w)(\w).*$|$1$2$3/| # 整句模式下，输入syff/ 出单字
+      - derive/^(.{2}|\w+?);.*,(\w)(\w).*$/$1$2$3o/ # 整句模式下，输入syffo 出单字
+      - derive|^(.{2});.*,(\w)(\w).*$|$1$2$3/| # 整句模式下，输入syff/ 出单字
+      - derive|^(\w+?);.*,(\w)(\w).*$|$1$2$3/| # 整句模式下，输入syff/ 出单字
 
 translator:
   dictionary: moqi_wan.extended
+  prism: moqi_wan_flypy
   initial_quality: 10000
   enable_completion: false
-  ##  默认为不超过 2 个字的候选项显示输入码；将 2 改为 0 可关闭编码提示，
-  ##  改为 1 则是只显示单字的输入码，依此类推。
-  spelling_hints: 10      #将注释以词典字符串形式完全暴露，通过pro_comment_format.lua完全接管，灵活配置。
-  comment_format: {comment}  #将注释以词典字符串形式完全暴露，通过pro_comment_format.lua完全接管，灵活配置。
-
-  enable_user_dict: false # 是否开启自动调频
+  spelling_hints: 10
+  comment_format: {comment}
+  enable_user_dict: false
   preedit_format:
-
-aux_patch:
-  __include: moqi_speller.yaml:/flypy_aux
-  __append:
-    __include: moqi_speller.yaml:/common_aux
-
-__patch:
-  add_user_dict/dictionary: moqi_wan.extended
-  user_dict_set/dictionary: moqi_wan.extended
-  translator/prism: moqi_wan_flypy
-  user_dict_set/prism: moqi_wan_flypy
-  add_user_dict/prism: moqi_wan_flypy
-  big_char_set/prism: moqi_wan_big_flypy
-  speller/algebra/+:
-    __include: aux_patch
-
 
 # 快捷键
 key_binder:
   import_preset: default
   bindings:
-    #- { when: composing, accept: Tab, send: '[' } ## 取消注释后：tab引导辅助码
     - { when: composing, accept: Control+m, send: Return }
     - { when: composing, accept: Control+w, send: Control+BackSpace }
     - { when: has_menu, accept: semicolon, send: 2 }
-    # - { when: has_menu, accept: slash, send: 3 } # 用/进行选3
     - { when: composing, accept: Control+i, send: Shift+Right }
     - { when: composing, accept: Control+o, send: Shift+Left }
-    # 显示墨奇码拆分的快速开关
     - { when: has_menu, accept: "Control+p", toggle: chaifen }
     - { when: has_menu, accept: "Control+l", toggle: chaifen_all }
     - { when: has_menu, accept: "Control+e", toggle: chinese_english }
-
-
     - { match: "[a-z]{1,3}", accept: Tab,  send_sequence: "/1" }
     - { match: "[a-z]{1,3}", accept: "/",  send_sequence: "/1" }
     - { match: "[a-z]{1,3}", accept: ".",  send_sequence: "/1" }
-    # - { when: composing, match: "[a-z]{2}", accept: Tab, send: '|' }
-
-    ## 启用光标回退至特定音节后、补充辅助码的功能。补充完辅助码后，可以再按一次tab回到整句检查
     - { when: composing, accept: Control+1, send_sequence: '{Home}{Shift+Right}[' }
     - { when: composing, accept: Control+2, send_sequence: '{Home}{Shift+Right}{Shift+Right}[' }
     - { when: composing, accept: Control+3, send_sequence: '{Home}{Shift+Right}{Shift+Right}{Shift+Right}[' }
@@ -113,8 +151,6 @@ key_binder:
     - { when: composing, accept: Control+5, send_sequence: '{Home}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}[' }
     - { when: composing, accept: Control+6, send_sequence: '{Home}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}[' }
     - { when: composing, accept: Control+7, send_sequence: '{Home}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}{Shift+Right}[' }
-
-    # 大写辅助码加到整句第一个音节，例如iuyyfw默认是楚云飞，按下shift+u (iuu yy fw)变成出运费
     - { when: has_menu, accept: Shift+A, send_sequence: "{Shift+Right}a{Shift+Right}" }
     - { when: has_menu, accept: Shift+B, send_sequence: "{Shift+Right}b{Shift+Right}" }
     - { when: has_menu, accept: Shift+C, send_sequence: "{Shift+Right}c{Shift+Right}" }
@@ -141,22 +177,10 @@ key_binder:
     - { when: has_menu, accept: Shift+X, send_sequence: "{Shift+Right}x{Shift+Right}" }
     - { when: has_menu, accept: Shift+Y, send_sequence: "{Shift+Right}y{Shift+Right}" }
     - { when: has_menu, accept: Shift+Z, send_sequence: "{Shift+Right}z{Shift+Right}" }
-# 启用語言模型
-#__include: moqi:/octagram/enable_for_sentence
 
-custom_phrase:
-  dictionary: ""
-  user_dict: custom_phrase/custom_phrase
-  db_class: stabledb
-  enable_completion: false
-  enable_sentence: false
-  initial_quality: 100000
-
-# 3码出简让全
-custom_phrase_3_code:
-  dictionary: ""
-  user_dict: custom_phrase/custom_phrase_cjrq_for_xh
-  db_class: stabledb
-  enable_sentence: false
-  enable_completion: false
-  initial_quality: 100001 #本表词和系统词重码居后
+__patch:
+  add_user_dict/dictionary: moqi_wan.extended
+  user_dict_set/dictionary: moqi_wan.extended
+  user_dict_set/prism: moqi_wan_flypy
+  add_user_dict/prism: moqi_wan_flypy
+  big_char_set/prism: moqi_wan_flypy
